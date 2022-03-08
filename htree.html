@@ -1,20 +1,109 @@
-<div class="container-fluid">
-  <h1 class="text-center">H-Tree Model</h1>
-    <div id="h-menu">
-    Depth:
-    <select id="menu">
-      <option value="1">1</option>
-      <option value="2">2</option>
-      <option value="3">3</option>
-      <option value="4">4</option>
-      <option value="5">5</option>
-      <option value="6">6</option>
-      <option value="7">7</option>
-      <option value="8">8</option>
-      <option value="9">9</option>
-    </select>
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+      body {
+        font-family: Monospace;
+        background-color: #ffdcbf;
+      }
+
+      .content{
+        background-color:green;
+        position: absolute;
+          left: 50%;
+          margin-left: -350px;
+        margin-top: 20px;
+          width: 700px;
+          height: 700px;
+      }
+
+      #h-menu {
+        position: absolute;
+        left: 45%;
+      }
+    </style>
+    
+    <script>
+      // https://www.sitepoint.com/javascript-generate-lighter-darker-color/
+      function ColorLuminance(hex, lum) {
+
+        // validate hex string
+        hex = String(hex).replace(/[^0-9a-f]/gi, '');
+        if (hex.length < 6) {
+          hex = hex[0]+hex[0]+hex[1]+hex[1]+hex[2]+hex[2];
+        }
+        lum = lum || 0;
+
+        // convert to decimal and change luminosity
+        var rgb = "#", c, i;
+        for (i = 0; i < 3; i++) {
+          c = parseInt(hex.substr(i*2,2), 16);
+          c = Math.round(Math.min(Math.max(0, c + (c * lum)), 255)).toString(16);
+          rgb += ("00"+c).substr(c.length);
+        }
+
+        return rgb;
+      }
+
+      function drawLine(context, x1, y1, x2, y2) {
+        context.moveTo(x1, y1);
+        context.lineTo(x2, y2);
+      }
+
+      function drawHTree(context, x, y, length, depth) {
+        if (depth == 0)
+          return;
+        var x0 = x - length/2;
+        var y0 = y - length/2;
+        var x1 = x + length/2;
+        var y1 = y + length/2;
+
+        drawLine(context, x0, y0, x0, y1);
+        drawLine(context, x1, y0, x1, y1);
+        drawLine(context, x0, y, x1, y);
+
+        var newLength = length/2;
+        drawHTree(context, x0, y0, newLength, depth - 1);
+        drawHTree(context, x0, y1, newLength, depth - 1);
+        drawHTree(context, x1, y0, newLength, depth - 1);
+        drawHTree(context, x1, y1, newLength, depth - 1);
+      }
+
+      function drawHTreeHelper(canvas, width, height, depth) {
+        var context = canvas.getContext("2d");
+        context.clearRect(0, 0, width, height);
+        context.beginPath();
+        drawHTree(context, width/2, height/2, 300, depth);
+        context.stroke();
+      }
+
+      $(document).ready(function() {
+        var canvas = document.getElementById("h-tree");
+        drawHTreeHelper(canvas, canvas.width, canvas.height, 1);
+
+        $("#menu").focus().change(function() {
+          drawHTreeHelper(canvas, canvas.width, canvas.height, $(this).val());
+        });
+      });
+    </script>
+    
+  <div class="container-fluid">
+    <h1 class="text-center">H-Tree Model</h1>
+      <div id="h-menu">
+      Depth:
+      <select id="menu">
+        <option value="1">1</option>
+        <option value="2">2</option>
+        <option value="3">3</option>
+        <option value="4">4</option>
+        <option value="5">5</option>
+        <option value="6">6</option>
+        <option value="7">7</option>
+        <option value="8">8</option>
+        <option value="9">9</option>
+      </select>
+    </div>
+    <div class="content">
+      <canvas width="700", height="700" id="h-tree"></canvas>
+    </div>
   </div>
-  <div class="content">
-    <canvas width="700", height="700" id="h-tree"></canvas>
-  </div>
-</div>
